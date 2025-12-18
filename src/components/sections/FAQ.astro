@@ -1,0 +1,174 @@
+---
+/**
+ * FAQ Komponens
+ * - Accordion működés
+ * - Schema.org FAQPage markup
+ * - Animált nyitás/zárás
+ * - Accessibility: aria-expanded, aria-controls
+ */
+
+import { siteConfig } from '../../config/site.config';
+
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  items: FAQItem[];
+  title?: string;
+  subtitle?: string;
+  allowMultiple?: boolean; // Több elem is nyitva lehet egyszerre?
+}
+
+const {
+  items,
+  title = 'Gyakran Ismételt Kérdések',
+  subtitle,
+  allowMultiple = false,
+} = Astro.props;
+
+// Schema.org FAQPage
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": items.map(item => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer,
+    },
+  })),
+};
+---
+
+<section class="faq py-16 lg:py-24">
+  <div class="container mx-auto px-4 max-w-3xl">
+    {title && (
+      <div class="text-center mb-12">
+        <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+          {title}
+        </h2>
+        {subtitle && (
+          <p class="text-lg text-gray-600">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    )}
+    
+    <div 
+      class="faq-list space-y-4"
+      data-allow-multiple={allowMultiple.toString()}
+    >
+      {items.map((item, index) => (
+        <div class="faq-item border border-gray-200 rounded-xl overflow-hidden">
+          <button
+            type="button"
+            class="faq-trigger w-full flex items-center justify-between p-5 text-left bg-white hover:bg-gray-50 transition-colors"
+            aria-expanded="false"
+            aria-controls={`faq-content-${index}`}
+            id={`faq-trigger-${index}`}
+          >
+            <span class="font-semibold text-gray-900 pr-4">
+              {item.question}
+            </span>
+            <span class="faq-icon flex-shrink-0 w-6 h-6 text-primary-600 transition-transform duration-300">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+          
+          <div
+            id={`faq-content-${index}`}
+            class="faq-content hidden"
+            role="region"
+            aria-labelledby={`faq-trigger-${index}`}
+          >
+            <div class="p-5 pt-0 text-gray-600 leading-relaxed">
+              <Fragment set:html={item.answer} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Schema.org FAQPage -->
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+<style>
+  /* Ikon forgatás nyitott állapotban */
+  .faq-trigger[aria-expanded="true"] .faq-icon {
+    transform: rotate(180deg);
+  }
+  
+  /* Tartalom animáció */
+  .faq-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+  
+  .faq-content.open {
+    display: block;
+    max-height: 500px; /* Kellően nagy érték */
+  }
+  
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .faq-icon,
+    .faq-content {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  function initFAQ() {
+    const faqLists = document.querySelectorAll('.faq-list');
+    
+    faqLists.forEach(list => {
+      const allowMultiple = list.getAttribute('data-allow-multiple') === 'true';
+      const triggers = list.querySelectorAll('.faq-trigger');
+      
+      triggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+          const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+          const contentId = trigger.getAttribute('aria-controls');
+          if (!contentId) return;
+          const content = document.getElementById(contentId);
+          
+          if (!content) return;
+          
+          // Ha nem engedélyezett több nyitott, zárjuk be a többit
+          if (!allowMultiple && !isExpanded) {
+            list.querySelectorAll('.faq-trigger[aria-expanded="true"]').forEach(openTrigger => {
+              if (openTrigger !== trigger) {
+                const openContentId = openTrigger.getAttribute('aria-controls');
+                if (openContentId) {
+                  const openContent = document.getElementById(openContentId);
+                  openTrigger.setAttribute('aria-expanded', 'false');
+                  if (openContent) openContent.classList.remove('open');
+                }
+              }
+            });
+          }
+          
+          // Toggle current
+          trigger.setAttribute('aria-expanded', (!isExpanded).toString());
+          content.classList.toggle('open', !isExpanded);
+        });
+      });
+    });
+  }
+  
+  // Init on load
+  initFAQ();
+  
+  // Re-init after View Transitions
+  document.addEventListener('astro:after-swap', initFAQ);
+</script>

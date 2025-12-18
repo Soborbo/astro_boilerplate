@@ -1,0 +1,235 @@
+---
+import { t, type Locale } from '../../config/i18n';
+
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = 'hu' } = Astro.props;
+const i18n = t(locale);
+---
+
+<!-- Exit Intent Modal - Csak desktop, szabályok szerint -->
+<div 
+  id="exit-intent-modal" 
+  class="fixed inset-0 z-[100] hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="exit-intent-title"
+>
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="exit-intent-overlay"></div>
+  
+  <!-- Modal -->
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform scale-95 opacity-0 transition-all duration-300" id="exit-intent-content">
+      
+      <!-- Bezárás gomb -->
+      <button 
+        id="exit-intent-close"
+        class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+        aria-label={i18n.common.close}
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      
+      <!-- Tartalom -->
+      <div class="text-center">
+        <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        
+        <h2 id="exit-intent-title" class="text-2xl font-bold text-gray-900 mb-3">
+          {i18n.exitIntent.title}
+        </h2>
+        
+        <p class="text-gray-600 mb-6">
+          {i18n.exitIntent.description}
+        </p>
+        
+        <!-- Email form time-to-submit védelemmel -->
+        <form id="exit-intent-form" class="space-y-4">
+          <input 
+            type="email" 
+            name="email"
+            placeholder={i18n.form.emailPlaceholder}
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+          />
+          
+          <!-- Honeypot -->
+          <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off" />
+          
+          <!-- Time-to-submit hidden field -->
+          <input type="hidden" name="form_start_time" id="exit-form-start-time" />
+          
+          <button
+            type="submit"
+            id="exit-intent-submit"
+            class="w-full px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            data-original-text={i18n.exitIntent.cta}
+            data-confirm-text={i18n.exitIntent.confirmSubmit}
+            data-sending-text={i18n.exitIntent.sending}
+          >
+            {i18n.exitIntent.cta}
+          </button>
+        </form>
+        
+        <button 
+          id="exit-intent-dismiss"
+          class="mt-4 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          {i18n.exitIntent.dismiss}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById('exit-intent-modal');
+  const content = document.getElementById('exit-intent-content');
+  const overlay = document.getElementById('exit-intent-overlay');
+  const closeBtn = document.getElementById('exit-intent-close');
+  const dismissBtn = document.getElementById('exit-intent-dismiss');
+  const form = document.getElementById('exit-intent-form') as HTMLFormElement;
+  const startTimeInput = document.getElementById('exit-form-start-time') as HTMLInputElement;
+  
+  // Exit intent szabályok
+  const EXIT_INTENT_CONFIG = {
+    minTimeOnPage: 30000, // 30 másodperc
+    mouseSpeedThreshold: 100, // px/sec
+    storageKey: 'exit_intent_shown',
+    formSubmittedKey: 'form_submitted',
+    minFormTime: 3000, // 3 másodperc minimum kitöltési idő (bot védelem)
+  };
+  
+  let pageLoadTime = Date.now();
+  let lastMouseY = 0;
+  let lastMouseTime = Date.now();
+  let formFocusTime: number | null = null;
+  
+  function shouldShowExitIntent(): boolean {
+    // 1. Csak desktop
+    if (window.innerWidth < 1024) return false;
+    
+    // 2. Session-ben már látta
+    if (sessionStorage.getItem(EXIT_INTENT_CONFIG.storageKey)) return false;
+    
+    // 3. Legalább 30mp eltelt
+    if (Date.now() - pageLoadTime < EXIT_INTENT_CONFIG.minTimeOnPage) return false;
+    
+    // 4. Nem töltötte ki a formot
+    if (localStorage.getItem(EXIT_INTENT_CONFIG.formSubmittedKey)) return false;
+    
+    return true;
+  }
+  
+  function showModal() {
+    if (!shouldShowExitIntent()) return;
+    
+    modal?.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      content?.classList.remove('scale-95', 'opacity-0');
+      content?.classList.add('scale-100', 'opacity-100');
+    });
+    
+    sessionStorage.setItem(EXIT_INTENT_CONFIG.storageKey, 'true');
+    document.body.style.overflow = 'hidden';
+    
+    // Focus az email mezőre
+    form?.querySelector('input[type="email"]')?.focus();
+  }
+  
+  function hideModal() {
+    content?.classList.remove('scale-100', 'opacity-100');
+    content?.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+      modal?.classList.add('hidden');
+      document.body.style.overflow = '';
+    }, 300);
+  }
+  
+  // Egér mozgás figyelése
+  document.addEventListener('mousemove', (e) => {
+    const currentTime = Date.now();
+    const timeDiff = currentTime - lastMouseTime;
+    
+    if (timeDiff > 0) {
+      const distance = Math.abs(e.clientY - lastMouseY);
+      const speed = (distance / timeDiff) * 1000;
+      
+      // 5. Egér a viewport teteje felé megy
+      // 6. Gyors mozgás (>100px/sec)
+      if (
+        e.clientY < 50 &&
+        lastMouseY > e.clientY &&
+        speed > EXIT_INTENT_CONFIG.mouseSpeedThreshold
+      ) {
+        showModal();
+      }
+    }
+    
+    lastMouseY = e.clientY;
+    lastMouseTime = currentTime;
+  });
+  
+  // Bezárás események
+  closeBtn?.addEventListener('click', hideModal);
+  dismissBtn?.addEventListener('click', hideModal);
+  overlay?.addEventListener('click', hideModal);
+  
+  // ESC gomb
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal?.classList.contains('hidden')) {
+      hideModal();
+    }
+  });
+  
+  // Form focus - time-to-submit mérés kezdete
+  form?.querySelector('input[type="email"]')?.addEventListener('focus', () => {
+    if (!formFocusTime) {
+      formFocusTime = Date.now();
+      if (startTimeInput) {
+        startTimeInput.value = formFocusTime.toString();
+      }
+    }
+  });
+  
+  // Form submit - time-to-submit ellenőrzés
+  form?.addEventListener('submit', (e) => {
+    const submitTime = Date.now();
+    const submitBtn = document.getElementById('exit-intent-submit') as HTMLButtonElement;
+
+    // Bot védelem: túl gyors kitöltés
+    if (formFocusTime && (submitTime - formFocusTime) < EXIT_INTENT_CONFIG.minFormTime) {
+      e.preventDefault();
+
+      // Megerősítés kérése - using i18n from data attributes
+      if (submitBtn) {
+        const confirmText = submitBtn.getAttribute('data-confirm-text') || 'Click again to confirm';
+        const sendingText = submitBtn.getAttribute('data-sending-text') || 'Sending...';
+
+        submitBtn.textContent = confirmText;
+        submitBtn.setAttribute('data-confirm', 'true');
+
+        submitBtn.addEventListener('click', function handler() {
+          if (submitBtn.getAttribute('data-confirm') === 'true') {
+            submitBtn.removeAttribute('data-confirm');
+            submitBtn.textContent = sendingText;
+            submitBtn.removeEventListener('click', handler);
+          }
+        }, { once: true });
+      }
+
+      return;
+    }
+
+    localStorage.setItem(EXIT_INTENT_CONFIG.formSubmittedKey, 'true');
+  });
+</script>

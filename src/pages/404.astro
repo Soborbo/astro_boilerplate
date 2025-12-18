@@ -1,0 +1,85 @@
+---
+import Base from '../layouts/Base.astro';
+import { siteConfig } from '../config/site.config';
+import { t, getLocaleFromUrl, type Locale } from '../config/i18n';
+
+const locale = getLocaleFromUrl(Astro.url);
+const i18n = t(locale);
+
+// Népszerű oldalak - TESTRE SZABANDÓ
+const popularPages = [
+  { title: i18n.nav.services, href: '/szolgaltatasok', description: 'Tekintse meg szolgáltatásainkat' },
+  { title: i18n.nav.pricing, href: '/arak', description: 'Átlátható árazás' },
+  { title: i18n.nav.contact, href: '/kapcsolat', description: 'Lépjen velünk kapcsolatba' },
+];
+---
+
+<Base 
+  title={i18n.error404.title}
+  description={i18n.error404.description}
+  noindex={true}
+  locale={locale}
+>
+  <section class="min-h-[70vh] flex items-center justify-center py-16">
+    <div class="container mx-auto px-4 text-center max-w-2xl">
+      
+      <!-- 404 vizuális -->
+      <div class="mb-8">
+        <span class="text-8xl lg:text-9xl font-bold text-primary-100">404</span>
+      </div>
+      
+      <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+        {i18n.error404.heading}
+      </h1>
+      
+      <p class="text-lg text-gray-600 mb-8">
+        {i18n.error404.description}
+      </p>
+      
+      <!-- Gyors linkek -->
+      <div class="mb-10">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">{i18n.error404.suggestions}</h2>
+        <div class="grid sm:grid-cols-3 gap-4">
+          {popularPages.map(page => (
+            <a 
+              href={page.href}
+              class="p-4 bg-gray-50 rounded-lg hover:bg-primary-50 hover:border-primary-200 border border-transparent transition-colors text-left"
+            >
+              <div class="font-medium text-gray-900 mb-1">{page.title}</div>
+              <div class="text-sm text-gray-600">{page.description}</div>
+            </a>
+          ))}
+        </div>
+      </div>
+      
+      <!-- CTA - Lead capture -->
+      <div class="bg-primary-50 rounded-xl p-6 lg:p-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">
+          {i18n.error404.notFound}
+        </h2>
+        <p class="text-gray-600 mb-4">
+          {i18n.error404.contactUs}
+        </p>
+        <a 
+          href="/kapcsolat"
+          class="btn btn-primary"
+        >
+          {i18n.nav.contact}
+        </a>
+      </div>
+      
+      <!-- Vissza a főoldalra -->
+      <div class="mt-8">
+        <a 
+          href="/"
+          class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          {i18n.common.backToHome}
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

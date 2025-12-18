@@ -1,0 +1,58 @@
+---
+interface Props {
+  threshold?: number;
+  label?: string;
+}
+
+const { 
+  threshold = 400,
+  label = 'Vissza a tetejére'
+} = Astro.props;
+---
+
+<button
+  id="back-to-top"
+  class="fixed bottom-24 lg:bottom-8 right-4 z-30 p-3 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none focus-visible:opacity-100 focus-visible:translate-y-0 focus-visible:pointer-events-auto"
+  aria-label={label}
+  data-threshold={threshold}
+>
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+  </svg>
+</button>
+
+<script>
+  const button = document.getElementById('back-to-top');
+  const threshold = parseInt(button?.dataset.threshold || '400');
+  let ticking = false;
+  
+  function handleScroll() {
+    if (window.scrollY > threshold) {
+      button?.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+      button?.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+    } else {
+      button?.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+      button?.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+    }
+    ticking = false;
+  }
+  
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(handleScroll);
+      ticking = true;
+    }
+  }, { passive: true });
+  
+  button?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+<style>
+  @media (prefers-reduced-motion: reduce) {
+    #back-to-top {
+      transition: opacity 0.01ms !important;
+    }
+  }
+</style>

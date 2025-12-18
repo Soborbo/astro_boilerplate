@@ -1,0 +1,57 @@
+# Cloudflare Pages Configuration
+# ⚠️ NE TÖLTS FEL API KULCSOKAT! Cloudflare dashboard-on állítsd be az env vars-okat.
+
+name = "project-name"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "./dist"
+
+# KV Namespace - Rate limiting a form handler-hez
+# Létrehozás: wrangler kv:namespace create FORM_SUBMISSIONS
+# [[kv_namespaces]]
+# binding = "FORM_SUBMISSIONS"
+# id = "xxxxxxxxxxxxxxxxxxxxx"
+
+# Environment Variables példák (a dashboard-on állítsd be, NE itt!)
+# [vars]
+# PUBLIC_SITE_URL = "https://example.com"
+
+# Secrets (MINDIG a dashboard-on!)
+# GTM_ID, GOOGLE_SHEETS_API_KEY, RESEND_API_KEY, SLACK_WEBHOOK_URL
+
+# Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# CSP Header - Testre szabandó!
+# [[headers]]
+#   for = "/*"
+#   [headers.values]
+#     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com"
+
+# Cache headers - Static assets
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# API endpoints - no cache
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+# Redirects (példa)
+# [[redirects]]
+#   from = "/regi-oldal"
+#   to = "/uj-oldal"
+#   status = 301

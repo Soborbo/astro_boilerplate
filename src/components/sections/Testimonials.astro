@@ -1,0 +1,226 @@
+---
+/**
+ * Testimonials Komponens
+ * - Swiper/carousel vagy grid layout
+ * - Schema.org Review markup
+ * - Csillag értékelés
+ * - Avatar támogatás
+ */
+
+import { siteConfig } from '../../config/site.config';
+
+interface Testimonial {
+  name: string;
+  role?: string;        // pl. "Ügyvezető, ABC Kft."
+  content: string;
+  rating?: number;      // 1-5
+  avatar?: string;      // Kép URL
+  date?: string;        // ISO date
+}
+
+interface Props {
+  items: Testimonial[];
+  title?: string;
+  subtitle?: string;
+  layout?: 'grid' | 'carousel';
+  showRating?: boolean;
+}
+
+const {
+  items,
+  title = 'Ügyfeleink mondták',
+  subtitle,
+  layout = 'grid',
+  showRating = true,
+} = Astro.props;
+
+// Átlagos értékelés számítása
+const ratings = items.filter(t => t.rating).map(t => t.rating!);
+const averageRating = ratings.length > 0 
+  ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+  : null;
+
+// Schema.org AggregateRating + Reviews
+const reviewSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": siteConfig.company.legalName,
+  "url": siteConfig.url,
+  ...(averageRating && {
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": averageRating,
+      "reviewCount": ratings.length,
+      "bestRating": "5",
+      "worstRating": "1",
+    },
+  }),
+  "review": items.map(item => ({
+    "@type": "Review",
+    "author": {
+      "@type": "Person",
+      "name": item.name,
+    },
+    "reviewBody": item.content,
+    ...(item.rating && {
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": item.rating,
+        "bestRating": "5",
+        "worstRating": "1",
+      },
+    }),
+    ...(item.date && { "datePublished": item.date }),
+  })),
+};
+
+// Csillag generálás
+function renderStars(rating: number) {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+  
+  return { fullStars, hasHalfStar, emptyStars };
+}
+---
+
+<section class="testimonials py-16 lg:py-24 bg-gray-50">
+  <div class="container mx-auto px-4">
+    <div class="text-center mb-12">
+      {title && (
+        <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+          {title}
+        </h2>
+      )}
+      {subtitle && (
+        <p class="text-lg text-gray-600 mb-4">
+          {subtitle}
+        </p>
+      )}
+      
+      <!-- Összesített értékelés -->
+      {averageRating && showRating && (
+        <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
+          <div class="flex text-yellow-400" aria-hidden="true">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <svg 
+                class={`w-5 h-5 ${i < Math.round(parseFloat(averageRating)) ? 'fill-current' : 'fill-gray-300'}`}
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+            ))}
+          </div>
+          <span class="font-semibold">{averageRating}</span>
+          <span>({ratings.length} értékelés)</span>
+        </div>
+      )}
+    </div>
+    
+    <!-- Testimonial kártyák -->
+    <div class={`
+      ${layout === 'grid' 
+        ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8' 
+        : 'flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 -mx-4 px-4'
+      }
+    `}>
+      {items.map((item, index) => {
+        const stars = item.rating ? renderStars(item.rating) : null;
+        
+        return (
+          <article 
+            class={`
+              testimonial-card bg-white rounded-xl p-6 shadow-sm border border-gray-100
+              ${layout === 'carousel' ? 'flex-shrink-0 w-[320px] snap-center' : ''}
+            `}
+          >
+            <!-- Csillagok -->
+            {stars && showRating && (
+              <div class="flex text-yellow-400 mb-4" aria-label={`${item.rating} csillagos értékelés`}>
+                {Array.from({ length: stars.fullStars }).map(() => (
+                  <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                ))}
+                {stars.hasHalfStar && (
+                  <svg class="w-5 h-5" viewBox="0 0 20 20">
+                    <defs>
+                      <linearGradient id={`half-star-${index}`}>
+                        <stop offset="50%" stop-color="currentColor" class="text-yellow-400"/>
+                        <stop offset="50%" stop-color="currentColor" class="text-gray-300"/>
+                      </linearGradient>
+                    </defs>
+                    <path fill={`url(#half-star-${index})`} d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                )}
+                {Array.from({ length: stars.emptyStars }).map(() => (
+                  <svg class="w-5 h-5 fill-gray-300" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                ))}
+              </div>
+            )}
+            
+            <!-- Tartalom -->
+            <blockquote class="text-gray-700 mb-6 leading-relaxed">
+              <p>"{item.content}"</p>
+            </blockquote>
+            
+            <!-- Szerző -->
+            <footer class="flex items-center gap-3">
+              {item.avatar ? (
+                <img 
+                  src={item.avatar} 
+                  alt=""
+                  class="w-12 h-12 rounded-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+                  <span class="text-primary-600 font-semibold text-lg">
+                    {item.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div>
+                <cite class="font-semibold text-gray-900 not-italic">
+                  {item.name}
+                </cite>
+                {item.role && (
+                  <p class="text-sm text-gray-500">{item.role}</p>
+                )}
+              </div>
+            </footer>
+          </article>
+        );
+      })}
+    </div>
+    
+    <!-- Carousel indikátor (ha carousel layout) -->
+    {layout === 'carousel' && items.length > 3 && (
+      <div class="flex justify-center gap-2 mt-6">
+        {items.map((_, index) => (
+          <button 
+            class="w-2 h-2 rounded-full bg-gray-300 hover:bg-primary-600 transition-colors"
+            aria-label={`Ugrás a ${index + 1}. véleményhez`}
+          />
+        ))}
+      </div>
+    )}
+  </div>
+</section>
+
+<!-- Schema.org Reviews -->
+<script type="application/ld+json" set:html={JSON.stringify(reviewSchema)} />
+
+<style>
+  /* Carousel scroll snap */
+  .testimonials .overflow-x-auto {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .testimonials .overflow-x-auto::-webkit-scrollbar {
+    display: none;
+  }
+</style>

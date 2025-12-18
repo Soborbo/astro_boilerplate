@@ -1,0 +1,82 @@
+---
+import { Picture } from 'astro:assets';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: ImageMetadata;
+  imageAlt?: string;
+  icon?: string;
+  ctaText?: string;
+  ctaHref?: string;
+  variant?: 'default' | 'featured' | 'minimal';
+}
+
+const {
+  title,
+  description,
+  image,
+  imageAlt = '',
+  icon,
+  ctaText,
+  ctaHref,
+  variant = 'default'
+} = Astro.props;
+
+const variantClasses = {
+  default: 'bg-white border border-gray-200 hover:border-primary-300 hover:shadow-lg',
+  featured: 'bg-primary-50 border-2 border-primary-200 hover:border-primary-400',
+  minimal: 'bg-gray-50 hover:bg-gray-100'
+};
+---
+
+<article class={`card ${variantClasses[variant]}`}>
+  <!-- Kép (opcionális) -->
+  {image && (
+    <div class="aspect-[16/10] overflow-hidden rounded-t-xl">
+      <Picture
+        src={image}
+        formats={['avif', 'webp']}
+        alt={imageAlt}
+        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
+        widths={[300, 400, 500]}
+        sizes="(max-width: 768px) 100vw, 33vw"
+        densities={[1, 2]}
+      />
+    </div>
+  )}
+  
+  <!-- Tartalom -->
+  <div class="card-body">
+    <!-- Ikon (opcionális, ha nincs kép) -->
+    {icon && !image && (
+      <div class="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center mb-4">
+        <span class="text-2xl">{icon}</span>
+      </div>
+    )}
+    
+    <h3 class="text-lg lg:text-xl font-semibold text-gray-900 mb-3">
+      {title}
+    </h3>
+    
+    <p class="text-gray-600 mb-6 flex-1">
+      {description}
+    </p>
+    
+    <!-- Slot extra tartalomnak -->
+    <slot />
+    
+    <!-- CTA gomb - mindig alul, vertikálisan centered szöveg -->
+    {ctaText && ctaHref && (
+      <div class="card-actions">
+        <a 
+          href={ctaHref}
+          class="btn btn-primary w-full"
+        >
+          {ctaText}
+        </a>
+      </div>
+    )}
+  </div>
+</article>

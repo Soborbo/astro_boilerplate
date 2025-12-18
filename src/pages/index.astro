@@ -1,0 +1,404 @@
+---
+import Base from '../layouts/Base.astro';
+import Card from '../components/ui/Card.astro';
+import InView from '../components/ui/InView.astro';
+import FAQ from '../components/sections/FAQ.astro';
+import Testimonials from '../components/sections/Testimonials.astro';
+import { siteConfig, generateFullPageSchema } from '../config/site.config';
+import { t, getLocaleFromUrl } from '../config/i18n';
+
+const locale = getLocaleFromUrl(Astro.url);
+const i18n = t(locale);
+
+// Schema.org - teljes körű
+const schema = generateFullPageSchema('LocalBusiness');
+
+const stats = [
+  { value: '500+', label: 'Elégedett ügyfél' },
+  { value: '10+', label: 'Év tapasztalat' },
+  { value: '98%', label: 'Elégedettségi arány' },
+  { value: '24h', label: 'Válaszidő' },
+];
+
+const services = [
+  {
+    title: 'Szolgáltatás 1',
+    description: 'Rövid leírás a szolgáltatásról, ami segít a látogatónak megérteni az értéket.',
+    icon: '🚀',
+    ctaText: i18n.common.learnMore,
+    ctaHref: '/szolgaltatas-1'
+  },
+  {
+    title: 'Szolgáltatás 2',
+    description: 'Rövid leírás a szolgáltatásról, ami segít a látogatónak megérteni az értéket.',
+    icon: '💡',
+    ctaText: i18n.common.learnMore,
+    ctaHref: '/szolgaltatas-2'
+  },
+  {
+    title: 'Szolgáltatás 3',
+    description: 'Rövid leírás a szolgáltatásról, ami segít a látogatónak megérteni az értéket.',
+    icon: '⚡',
+    ctaText: i18n.common.learnMore,
+    ctaHref: '/szolgaltatas-3'
+  },
+];
+
+// FAQ - TESTRE SZABANDÓ
+const faqItems = [
+  {
+    question: 'Mennyi idő alatt készül el a projekt?',
+    answer: 'A projekt típusától függően általában 2-4 hét alatt készülünk el. Egyedi igények esetén személyre szabott ütemtervet készítünk.',
+  },
+  {
+    question: 'Milyen garanciát vállalnak?',
+    answer: 'Minden munkánkra <strong>12 hónap garanciát</strong> vállalunk. Ha bármi probléma merül fel, ingyen javítjuk.',
+  },
+  {
+    question: 'Hogyan zajlik az együttműködés?',
+    answer: 'Első lépésként egy ingyenes konzultáción felmérjük az igényeit. Ezután részletes ajánlatot küldünk, majd a szerződéskötés után kezdődik a munka.',
+  },
+  {
+    question: 'Milyen fizetési lehetőségek vannak?',
+    answer: 'Banki átutalás és készpénzes fizetés is lehetséges. Nagyobb projekteknél részletfizetést is biztosítunk.',
+  },
+];
+
+// Testimonials - TESTRE SZABANDÓ
+const testimonials = [
+  {
+    name: 'Kovács Péter',
+    role: 'Ügyvezető, ABC Kft.',
+    content: 'Kiváló munkát végeztek! A weboldalunk forgalma 3x-osára nőtt az átadás óta. Mindenkinek ajánlom őket.',
+    rating: 5,
+    date: '2024-01-15',
+  },
+  {
+    name: 'Nagy Anna',
+    role: 'Marketing vezető',
+    content: 'Profi csapat, gyors kommunikáció. A kalkulátorunk naponta több tucat leadet generál.',
+    rating: 5,
+    date: '2024-02-20',
+  },
+  {
+    name: 'Szabó János',
+    role: 'Tulajdonos, XYZ Bt.',
+    content: 'Már a második projektünk velük. Mindig időben szállítanak és a minőség kifogástalan.',
+    rating: 4,
+    date: '2024-03-10',
+  },
+];
+---
+
+<Base 
+  title={`${i18n.nav.home} - ${siteConfig.name}`}
+  description={siteConfig.seo.defaultDescription}
+  locale={locale}
+>
+  <!-- Hero Section - NINCS animáció, fold felett! -->
+  <section class="hero min-h-[calc(100vh-72px)] flex flex-col">
+    <div class="flex-1 container mx-auto px-4 py-8 lg:py-12">
+      <div class="grid lg:grid-cols-5 gap-8 lg:gap-12 items-center h-full">
+        <div class="lg:col-span-3 flex flex-col justify-center order-2 lg:order-1">
+          <span class="text-primary-600 font-semibold text-sm uppercase tracking-wide mb-3">
+            Alcím / kategória
+          </span>
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight mb-6 text-balance">
+            Főcím ami felkelti a figyelmet
+          </h1>
+          <p class="text-lg lg:text-xl text-gray-600 mb-8 max-w-2xl">
+            Részletesebb leírás, ami elmagyarázza az értékajánlatot és cselekvésre ösztönöz.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="#contact" class="btn btn-primary">{i18n.common.getQuote}</a>
+            <a href="#services" class="btn btn-secondary">{i18n.common.learnMore}</a>
+          </div>
+        </div>
+        <div class="lg:col-span-2 order-1 lg:order-2">
+          <div class="relative aspect-[4/3] lg:aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl bg-gray-200 flex items-center justify-center">
+            <span class="text-gray-400">Hero kép helye</span>
+            <!-- 
+            Ha van kép:
+            <Picture
+              src={heroImage}
+              formats={['avif', 'webp']}
+              loading="eager"
+              fetchpriority="high"
+              decoding="sync"
+              densities={[1, 2]}
+              class="absolute inset-0 w-full h-full object-cover"
+            />
+            -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stats sor - above the fold -->
+    <div class="bg-gray-50 border-t border-gray-100 mt-auto">
+      <div class="container mx-auto px-4 py-6 lg:py-8">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          {stats.map((stat) => (
+            <div class="text-center">
+              <div class="text-2xl lg:text-3xl xl:text-4xl font-bold text-primary-600 mb-1">
+                {stat.value}
+              </div>
+              <div class="text-sm lg:text-base text-gray-600">
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Szolgáltatások szekció - Fold ALATT, animációkkal -->
+  <section id="services" class="py-16 lg:py-24">
+    <div class="container mx-auto px-4">
+      <InView animation="fade-up">
+        <div class="text-center mb-12">
+          <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+            {i18n.nav.services}
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Rövid bevezető szöveg a szolgáltatásokhoz.
+          </p>
+        </div>
+      </InView>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {services.map((service, index) => (
+          <InView animation="fade-up" delay={index * 100}>
+            <Card
+              title={service.title}
+              description={service.description}
+              icon={service.icon}
+              ctaText={service.ctaText}
+              ctaHref={service.ctaHref}
+            />
+          </InView>
+        ))}
+      </div>
+    </div>
+  </section>
+  
+  <!-- Testimonials szekció -->
+  <Testimonials 
+    items={testimonials}
+    title="Ügyfeleink mondták"
+    subtitle="Több mint 500 elégedett ügyfél"
+  />
+  
+  <!-- FAQ szekció -->
+  <FAQ 
+    items={faqItems}
+    title="Gyakran Ismételt Kérdések"
+    subtitle="Válaszok a leggyakoribb kérdésekre"
+  />
+  
+  <!-- Kapcsolat szekció -->
+  <section id="contact" class="py-16 lg:py-24 bg-gray-50">
+    <div class="container mx-auto px-4 max-w-2xl">
+      <InView animation="fade-up">
+        <div class="text-center mb-12">
+          <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+            {i18n.common.getQuote}
+          </h2>
+          <p class="text-lg text-gray-600">
+            Töltse ki az alábbi űrlapot és 24 órán belül jelentkezünk.
+          </p>
+        </div>
+      </InView>
+      
+      <InView animation="fade-up" delay={100}>
+        <!-- Progresszív form - JS nélkül is működik, de API-val is -->
+        <form 
+          action="/api/submit-form" 
+          method="POST"
+          class="bg-white rounded-2xl shadow-lg p-8"
+          id="contact-form"
+        >
+          <div class="space-y-6">
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                {i18n.form.name} *
+              </label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                required
+                class="form-input"
+                placeholder={i18n.form.namePlaceholder}
+              />
+            </div>
+            
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                {i18n.form.email} *
+              </label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                required
+                class="form-input"
+                placeholder={i18n.form.emailPlaceholder}
+              />
+            </div>
+            
+            <div>
+              <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                {i18n.form.phone}
+              </label>
+              <input 
+                type="tel" 
+                id="phone" 
+                name="phone"
+                class="form-input"
+                placeholder={i18n.form.phonePlaceholder}
+              />
+            </div>
+            
+            <div>
+              <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+                {i18n.form.message}
+              </label>
+              <textarea 
+                id="message" 
+                name="message" 
+                rows="4"
+                class="form-input resize-none"
+                placeholder={i18n.form.messagePlaceholder}
+              ></textarea>
+            </div>
+            
+            <!-- Honeypot spam védelem -->
+            <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off" />
+            
+            <!-- Time-to-submit védelem -->
+            <input type="hidden" name="form_start_time" id="form-start-time" />
+            
+            <!-- UTM hidden mezők -->
+            <input type="hidden" name="utm_source" id="utm_source" />
+            <input type="hidden" name="utm_medium" id="utm_medium" />
+            <input type="hidden" name="utm_campaign" id="utm_campaign" />
+            
+            <button 
+              type="submit" 
+              class="btn btn-primary w-full" 
+              id="submit-btn"
+              data-sending-text={i18n.common.sending}
+              data-error-text={i18n.form.submitError}
+            >
+              {i18n.common.sendMessage}
+            </button>
+          </div>
+        </form>
+      </InView>
+      
+      <script>
+        // Form elemek lekérése
+        const form = document.getElementById('contact-form');
+        const startTimeInput = document.getElementById('form-start-time');
+        const submitBtn = document.getElementById('submit-btn');
+        let formFocusTime = null;
+        
+        // i18n szövegek a data attribútumokból
+        const sendingText = submitBtn?.getAttribute('data-sending-text') || 'Sending...';
+        const errorText = submitBtn?.getAttribute('data-error-text') || 'An error occurred. Please try again.';
+        const originalBtnText = submitBtn?.textContent || 'Send';
+        
+        // Form focus time tracking
+        if (form) {
+          form.addEventListener('focusin', () => {
+            if (!formFocusTime) {
+              formFocusTime = Date.now();
+              if (startTimeInput) {
+                startTimeInput.value = formFocusTime.toString();
+              }
+            }
+          });
+        }
+        
+        // UTM adatok beillesztése
+        const utmData = localStorage.getItem('utm_data');
+        if (utmData) {
+          try {
+            const data = JSON.parse(utmData);
+            const sourceInput = document.getElementById('utm_source');
+            const mediumInput = document.getElementById('utm_medium');
+            const campaignInput = document.getElementById('utm_campaign');
+            
+            if (sourceInput) sourceInput.value = data.utm_source || '';
+            if (mediumInput) mediumInput.value = data.utm_medium || '';
+            if (campaignInput) campaignInput.value = data.utm_campaign || '';
+          } catch (e) {
+            console.error('UTM parse error:', e);
+          }
+        }
+        
+        // Form submit kezelés AJAX-szal
+        if (form && submitBtn) {
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = sendingText;
+            
+            try {
+              const formData = new FormData(form);
+              const data = Object.fromEntries(formData.entries());
+              
+              const response = await fetch('/api/submit-form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+              });
+              
+              const result = await response.json();
+              
+              if (result.success) {
+                // Sikeres beküldés
+                localStorage.setItem('form_submitted', 'true');
+                if (window.showToast) {
+                  window.showToast(result.message || 'Success!', { type: 'success' });
+                }
+                setTimeout(() => {
+                  window.location.href = '/koszonjuk';
+                }, 500);
+              } else {
+                // Hiba - Toast használata alert helyett
+                const errorMsg = result.error || errorText;
+                if (window.showToast) {
+                  window.showToast(errorMsg, { type: 'error', duration: 5000 });
+                } else {
+                  alert(errorMsg);
+                }
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+              }
+            } catch (error) {
+              console.error('Form submit error:', error);
+              if (window.showToast) {
+                window.showToast(errorText, { type: 'error', duration: 5000 });
+              } else {
+                alert(errorText);
+              }
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalBtnText;
+            }
+          });
+        }
+      </script>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    min-height: calc(100vh - 72px);
+    min-height: calc(100dvh - 72px);
+  }
+</style>

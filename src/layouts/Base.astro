@@ -1,0 +1,242 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import { siteConfig, generateFullPageSchema, type SchemaType } from '../config/site.config';
+import { t, getLocaleFromUrl, generateHreflangLinks, type Locale } from '../config/i18n';
+import SkipToContent from '../components/ui/SkipToContent.astro';
+import Header from '../components/sections/Header.astro';
+import Footer from '../components/sections/Footer.astro';
+import StickyMobileCTA from '../components/ui/StickyMobileCTA.astro';
+import BackToTop from '../components/ui/BackToTop.astro';
+import ExitIntent from '../components/scripts/ExitIntent.astro';
+import Toast from '../components/ui/Toast.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+  noindex?: boolean;
+  schemaType?: SchemaType;
+  schemaData?: Record<string, unknown>;
+  locale?: Locale;
+}
+
+const currentLocale = Astro.props.locale || getLocaleFromUrl(Astro.url);
+const i18n = t(currentLocale);
+
+const { 
+  title, 
+  description, 
+  canonical = Astro.url.href,
+  ogImage = siteConfig.seo.defaultOgImage,
+  noindex = false,
+  schemaType = 'LocalBusiness',
+  schemaData,
+} = Astro.props;
+
+const fullTitle = siteConfig.seo.titleTemplate.replace('%s', title);
+const fullOgImage = ogImage.startsWith('http') ? ogImage : `${siteConfig.url}${ogImage}`;
+const hreflangLinks = generateHreflangLinks(Astro.url.pathname, currentLocale);
+const schema = generateFullPageSchema(schemaType, schemaData);
+
+// Magyar nyelv detektálás tipográfiai beállításokhoz
+const isHungarian = currentLocale === 'hu';
+---
+
+<!DOCTYPE html>
+<html lang={i18n.lang} class="scroll-smooth scroll-pt-20">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Preconnect külső erőforrásokhoz -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+  
+  <!-- Kritikus font preload - latin-ext magyar karakterekhez -->
+  <link 
+    rel="preload" 
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap&subset=latin-ext" 
+    as="style" 
+  />
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap&subset=latin-ext" 
+    rel="stylesheet" 
+  />
+  
+  <!-- Alap meta -->
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  
+  {noindex && <meta name="robots" content="noindex, follow" />}
+  
+  <!-- Hreflang - többnyelvűsítés -->
+  {hreflangLinks.map(link => (
+    <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+  ))}
+  <link rel="alternate" hreflang="x-default" href={siteConfig.url} />
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={fullOgImage} />
+  <meta property="og:site_name" content={siteConfig.name} />
+  <meta property="og:locale" content={i18n.locale} />
+  
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={fullTitle} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={fullOgImage} />
+  
+  <!-- Favicon set -->
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content={siteConfig.colors.primary.DEFAULT} />
+  
+  <!-- Schema.org - Teljes körű -->
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  
+  <!-- View Transitions -->
+  <ViewTransitions />
+  
+  <!-- Above-the-fold kritikus CSS -->
+  <style is:inline>
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,sans-serif;line-height:1.6}
+    img{max-width:100%;height:auto;display:block}
+    .skip-link{position:absolute;top:-9999px;left:50%;transform:translateX(-50%);padding:0.75rem 1.5rem;background:#1e293b;color:#fff;font-weight:500;text-decoration:none;border-radius:0 0 0.5rem 0.5rem;z-index:9999}
+    .skip-link:focus{top:0}
+    @media(prefers-reduced-motion:reduce){*{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
+  </style>
+  
+  <!-- Magyar tipográfia -->
+  {isHungarian && (
+    <style is:inline>
+      p, li, td, th { hyphens: auto; -webkit-hyphens: auto; }
+    </style>
+  )}
+  
+  <!-- GTM via Partytown (Web Worker) -->
+  {siteConfig.tracking.enableGTM && (
+    <script type="text/partytown">
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer', import.meta.env.GTM_ID || 'GTM-XXXXXXX');
+    </script>
+  )}
+  
+  <slot name="head" />
+</head>
+<body>
+  <!-- GTM noscript fallback -->
+  {siteConfig.tracking.enableGTM && (
+    <noscript>
+      <iframe 
+        src={`https://www.googletagmanager.com/ns.html?id=${import.meta.env.GTM_ID || 'GTM-XXXXXXX'}`}
+        height="0" 
+        width="0" 
+        style="display:none;visibility:hidden"
+      ></iframe>
+    </noscript>
+  )}
+
+  <SkipToContent text={i18n.common.skipToContent} />
+  <Header locale={currentLocale} />
+  
+  <main id="main" tabindex="-1" transition:animate="fade">
+    <slot />
+  </main>
+  
+  <Footer locale={currentLocale} />
+  
+  <StickyMobileCTA locale={currentLocale} />
+  <BackToTop label={i18n.common.backToTop} />
+  <ExitIntent locale={currentLocale} />
+  <Toast />
+  
+  <!-- UTM tracking -->
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+      
+      const hasUtm = utmParams.some(p => params.get(p));
+      if (hasUtm) {
+        const utmData: Record<string, string | null> = {};
+        utmParams.forEach(p => utmData[p] = params.get(p));
+        utmData['landing_page'] = window.location.pathname;
+        utmData['timestamp'] = new Date().toISOString();
+        utmData['referrer'] = document.referrer;
+        localStorage.setItem('utm_data', JSON.stringify(utmData));
+      }
+    })();
+  </script>
+  
+  <!-- Performance budget warning (dev only) -->
+  <script>
+    if (import.meta.env.DEV) {
+      window.addEventListener('load', () => {
+        const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+        const jsSize = resources
+          .filter(r => r.name.endsWith('.js'))
+          .reduce((sum, r) => sum + (r.transferSize || 0), 0);
+
+        if (jsSize > 100 * 1024) {
+          console.warn(`⚠️ Performance budget exceeded! JS size: ${(jsSize / 1024).toFixed(1)}kb (limit: 100kb)`);
+        }
+
+        // GTM configuration warning
+        const gtmId = import.meta.env.GTM_ID;
+        if (!gtmId || gtmId === 'GTM-XXXXXXX') {
+          console.warn('⚠️ GTM_ID is not configured! Set GTM_ID environment variable for Google Tag Manager tracking.');
+        }
+      });
+    }
+  </script>
+  
+  <!-- Web Vitals monitoring -->
+  <script>
+    // Simple Web Vitals logging
+    if ('web-vital' in window || import.meta.env.PROD) {
+      const reportWebVitals = (metric: { name: string; value: number }) => {
+        // Send to analytics
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: 'web-vitals',
+            metric_name: metric.name,
+            metric_value: metric.value,
+          });
+        }
+      };
+      
+      // LCP
+      new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const lastEntry = entries[entries.length - 1];
+        reportWebVitals({ name: 'LCP', value: lastEntry.startTime });
+      }).observe({ type: 'largest-contentful-paint', buffered: true });
+      
+      // CLS
+      let clsValue = 0;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as any[]) {
+          if (!entry.hadRecentInput) {
+            clsValue += entry.value;
+          }
+        }
+        reportWebVitals({ name: 'CLS', value: clsValue });
+      }).observe({ type: 'layout-shift', buffered: true });
+    }
+  </script>
+</body>
+</html>

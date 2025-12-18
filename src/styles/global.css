@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Scroll padding a sticky headerhez - anchor linkek ne takaródjanak ki */
+  html {
+    scroll-padding-top: 80px;
+    scroll-behavior: smooth;
+  }
+  
+  /* Focus-visible styles (a11y) */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-500;
+  }
+  
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  
+  /* Alapértelmezett link stílusok */
+  a:not([class]) {
+    @apply text-primary-600 hover:text-primary-700 underline-offset-2;
+  }
+  
+  /* Külső linkek - noopener automatikusan kezelt a Astro-ban */
+  a[target="_blank"]::after {
+    content: '';
+    /* Vizuális jelzés opcionálisan hozzáadható */
+  }
+}
+
+@layer components {
+  /* Container alapértelmezés */
+  .container {
+    @apply max-w-7xl;
+  }
+  
+  /* Gomb stílusok - Mobile first, min 48px touch target */
+  .btn {
+    @apply inline-flex items-center justify-center;
+    @apply px-5 py-3 rounded-lg font-medium;
+    @apply transition-colors duration-200;
+    @apply min-h-[48px] min-w-[48px];
+    @apply text-center;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700;
+    @apply focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-gray-900 border-2 border-gray-200;
+    @apply hover:border-primary-600 hover:text-primary-600;
+    @apply focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+  }
+  
+  /* Form input stílusok */
+  .form-input {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg;
+    @apply focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+    @apply outline-none transition-colors;
+    @apply min-h-[48px]; /* Touch target */
+  }
+  
+  .form-input:invalid:not(:placeholder-shown) {
+    @apply border-red-500;
+  }
+  
+  .form-input:valid:not(:placeholder-shown) {
+    @apply border-green-500;
+  }
+  
+  /* Loading skeleton */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+  
+  /* Card alapstílus */
+  .card {
+    @apply flex flex-col h-full;
+    @apply bg-white rounded-xl border border-gray-200;
+    @apply hover:border-primary-300 hover:shadow-lg;
+    @apply transition-all duration-300;
+  }
+  
+  .card-body {
+    @apply flex flex-col flex-1 p-6;
+  }
+  
+  /* Card gombok egyvonalban */
+  .card-actions {
+    @apply mt-auto pt-4;
+  }
+}
+
+@layer utilities {
+  /* Honeypot mező elrejtése */
+  .honeypot {
+    position: absolute !important;
+    left: -9999px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  /* Text balance - hosszú címekhez */
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Print stylesheet */
+@media print {
+  /* Elrejtendő elemek */
+  header,
+  footer,
+  nav,
+  #sticky-mobile-cta,
+  #back-to-top,
+  #exit-intent-modal,
+  #cookie-banner,
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Oldal tördelés */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  
+  img, table, figure {
+    page-break-inside: avoid;
+  }
+  
+  /* Kalkulátor eredmények kiemelése */
+  .calculator-result {
+    border: 2px solid #000;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  
+  /* Linkek URL megjelenítése */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+    word-break: break-all;
+  }
+}

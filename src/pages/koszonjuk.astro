@@ -1,0 +1,116 @@
+---
+import Base from '../layouts/Base.astro';
+import { t, getLocaleFromUrl } from '../config/i18n';
+
+const locale = getLocaleFromUrl(Astro.url);
+const i18n = t(locale);
+
+// Upsell / cross-sell ajánlatok - TESTRE SZABANDÓ
+const relatedOffers = [
+  { 
+    title: 'Prémium csomag', 
+    description: 'Még több szolgáltatás kedvezményes áron',
+    href: '/premium',
+    icon: '⭐'
+  },
+  { 
+    title: 'Gyakori kérdések', 
+    description: 'Válaszok a leggyakoribb kérdésekre',
+    href: '/gyik',
+    icon: '❓'
+  },
+];
+---
+
+<Base 
+  title={i18n.thankYou.title}
+  description={i18n.thankYou.description}
+  noindex={true}
+  locale={locale}
+>
+  <section class="min-h-[70vh] flex items-center justify-center py-16">
+    <div class="container mx-auto px-4 text-center max-w-2xl">
+      
+      <!-- Siker ikon -->
+      <div class="mb-8">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+          <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+      </div>
+      
+      <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+        {i18n.thankYou.title}
+      </h1>
+      
+      <p class="text-lg text-gray-600 mb-8">
+        {i18n.thankYou.description}
+      </p>
+      
+      <!-- Mi történik most -->
+      <div class="bg-gray-50 rounded-xl p-6 mb-10 text-left">
+        <h2 class="font-semibold text-gray-900 mb-4">{i18n.thankYou.whatNext}</h2>
+        <ol class="space-y-3">
+          {i18n.thankYou.steps.map((step, index) => (
+            <li class="flex items-start gap-3">
+              <span class="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-sm font-medium">
+                {index + 1}
+              </span>
+              <span class="text-gray-600">{step}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+      
+      <!-- Upsell szekció -->
+      {relatedOffers.length > 0 && (
+        <div class="mb-10">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">{i18n.thankYou.alsoInterested}</h2>
+          <div class="grid sm:grid-cols-2 gap-4">
+            {relatedOffers.map(offer => (
+              <a 
+                href={offer.href}
+                class="p-4 bg-white border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-md transition-all text-left"
+              >
+                <span class="text-2xl mb-2 block">{offer.icon}</span>
+                <div class="font-medium text-gray-900 mb-1">{offer.title}</div>
+                <div class="text-sm text-gray-600">{offer.description}</div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <!-- Vissza a főoldalra -->
+      <a 
+        href="/"
+        class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        {i18n.common.backToHome}
+      </a>
+    </div>
+  </section>
+  
+  <!-- Conversion tracking scripts -->
+  <script>
+    // UTM adatok lekérése a lead attribúcióhoz
+    const utmData = localStorage.getItem('utm_data');
+    if (utmData) {
+      console.log('Lead source:', JSON.parse(utmData));
+      // GTM conversion event
+      if (window.dataLayer) {
+        window.dataLayer.push({
+          event: 'form_submission',
+          utm_data: JSON.parse(utmData),
+        });
+      }
+    }
+    
+    // Form submitted flag beállítása (exit intent ne jelenjen meg)
+    localStorage.setItem('form_submitted', 'true');
+  </script>
+</Base>

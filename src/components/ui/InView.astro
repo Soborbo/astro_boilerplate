@@ -1,0 +1,95 @@
+---
+/**
+ * InViewAnimation - Intersection Observer alapú animáció
+ * 
+ * ⚠️ FONTOS: Csak a fold ALATT használd! 
+ * A Hero szekcióban TILOS animáció (LCP optimalizálás miatt)
+ * 
+ * Használat:
+ * <InView animation="fade-up">
+ *   <Card ... />
+ * </InView>
+ */
+
+interface Props {
+  animation?: 'fade-up' | 'fade-in' | 'slide-left' | 'slide-right';
+  delay?: number;
+  threshold?: number;
+  class?: string;
+}
+
+const {
+  animation = 'fade-up',
+  delay = 0,
+  threshold = 0.1,
+  class: className = ''
+} = Astro.props;
+
+const animationClasses = {
+  'fade-up': 'translate-y-8 opacity-0',
+  'fade-in': 'opacity-0',
+  'slide-left': 'translate-x-8 opacity-0',
+  'slide-right': '-translate-x-8 opacity-0',
+};
+---
+
+<div 
+  class:list={[
+    'in-view-animation',
+    animationClasses[animation],
+    'transition-all duration-700 ease-out',
+    className
+  ]}
+  data-animation={animation}
+  data-threshold={threshold}
+  style={delay ? `transition-delay: ${delay}ms` : undefined}
+>
+  <slot />
+</div>
+
+<script>
+  // Csak ha reduced motion nincs beállítva
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  if (!prefersReducedMotion) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            
+            // Animáció típustól függő reset
+            el.classList.remove(
+              'translate-y-8', 
+              'translate-x-8', 
+              '-translate-x-8', 
+              'opacity-0'
+            );
+            
+            // Unobserve after animation
+            observer.unobserve(el);
+          }
+        });
+      },
+      {
+        rootMargin: '0px 0px -50px 0px',
+        threshold: 0.1,
+      }
+    );
+    
+    // Observe all animation elements
+    document.querySelectorAll('.in-view-animation').forEach((el) => {
+      observer.observe(el);
+    });
+  } else {
+    // Reduced motion: azonnal látható
+    document.querySelectorAll('.in-view-animation').forEach((el) => {
+      el.classList.remove(
+        'translate-y-8', 
+        'translate-x-8', 
+        '-translate-x-8', 
+        'opacity-0'
+      );
+    });
+  }
+</script>

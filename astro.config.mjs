@@ -9,7 +9,8 @@ const siteUrl = 'https://example.com';
 
 export default defineConfig({
   site: siteUrl,
-  output: 'static', // Cloudflare Pages static site
+  // FIX-008: Changed to 'hybrid' for API routes with prerender = false
+  output: 'hybrid', // Cloudflare Pages with API routes
   adapter: cloudflare({
     imageService: 'cloudflare',
   }),
@@ -63,6 +64,11 @@ export default defineConfig({
     // ENV változók kezelése - NE EXPONÁLD a titkokat!
     define: {
       'import.meta.env.PUBLIC_SITE_URL': JSON.stringify(siteUrl),
+    },
+    // FIX-008: Handle Node.js built-ins for Cloudflare Workers
+    ssr: {
+      external: ['@sendgrid/mail', '@sendgrid/client', '@sendgrid/helpers'],
+      noExternal: ['resend'],
     },
   },
   

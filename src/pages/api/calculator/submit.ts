@@ -4,7 +4,9 @@ import { sendEmail } from '@/lib/calculator/email/send';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/calculator/rate-limit';
 import { createLogger, generateRequestId } from '@/lib/calculator/logger';
 import { siteConfig } from '@/config/calculator/site';
-import { i18n } from '@/config/calculator/i18n';
+import { i18n, t } from '@/config/calculator/i18n';
+// FIX-008: Use unified API response format
+import { success, error, ErrorCodes } from '@/lib/calculator/api-response';
 
 export const prerender = false;
 
@@ -22,7 +24,8 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
     if (contentLength > siteConfig.maxPayloadSize) {
       log.warn('Payload too large', { contentLength });
-      return jsonError('Payload too large', 413);
+      // FIX-008: Use unified error response
+      return error(ErrorCodes.PAYLOAD_TOO_LARGE, 'Payload too large', 413);
     }
 
     // ============================================
@@ -31,10 +34,14 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     const rateLimit = await checkRateLimit('submit', ip);
 
     if (!rateLimit.allowed) {
-      log.warn('Rate limit exceeded', { ip });
-      return jsonError(
-        i18n[siteConfig.locale].errors.rateLimitExceeded,
+      log.warn('Rate limit exceeded', { ip, reason: rateLimit.reason });
+      // FIX-008: Use unified error response
+      // FIX-002: Use i18n for message
+      return error(
+        ErrorCodes.RATE_LIMIT_EXCEEDED,
+        t(siteConfig.locale, 'errors.rateLimitExceeded'),
         429,
+        { reason: rateLimit.reason }, // FIX-005: Include reason (minute or day)
         getRateLimitHeaders(rateLimit)
       );
     }
@@ -47,18 +54,13 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
     if (!result.success) {
       log.warn('Validation failed', { errors: result.error.flatten() });
-      return new Response(
-        JSON.stringify({
-          success: false,
-          errors: result.error.flatten().fieldErrors,
-        }),
-        {
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-            ...getRateLimitHeaders(rateLimit),
-          }
-        }
+      // FIX-008: Use unified error response
+      return error(
+        ErrorCodes.VALIDATION_ERROR,
+        'Validation failed',
+        400,
+        { errors: result.error.flatten().fieldErrors },
+        getRateLimitHeaders(rateLimit)
       );
     }
 
@@ -98,20 +100,20 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     // 6. SEND EMAILS
     // ============================================
     const locale = siteConfig.locale;
-    const t = i18n[locale];
+    const translations = i18n[locale];
 
     // User email
     const userEmailResult = await sendEmail({
       to: data.contact.email,
-      subject: `${t.thankYouTitle} - #${quoteId}`,
+      subject: `${translations.thankYouTitle} - #${quoteId}`,
       html: `
-        <h1>${t.thankYouTitle}</h1>
+        <h1>${translations.thankYouTitle}</h1>
         <p>${data.contact.firstName},</p>
-        <p>${t.thankYouMessage}</p>
-        <p><strong>Azonosító:</strong> ${quoteId}</p>
+        <p>${translations.thankYouMessage}</p>
+        <p><strong>${translations.quoteNumber}:</strong> ${quoteId}</p>
         <hr>
-        <p>Hamarosan felvesszük Önnel a kapcsolatot a megadott elérhetőségeken.</p>
-        <p><small>Ez egy automatikus email. Kérjük, ne válaszoljon rá.</small></p>
+        <p>${translations.emailFollowUp}</p>
+        <p><small>${translations.emailAutoReply}</small></p>
       `,
     });
 
@@ -123,9 +125,10 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     });
 
     // Admin email
+    // FIX-002: Use i18n for subject
     const adminEmailResult = await sendEmail({
       to: siteConfig.emails.admin,
-      subject: `Új ajánlatkérés: ${quoteId}`,
+      subject: `${translations.emailSubjectAdmin}: ${quoteId}`,
       html: `
         <h1>Új ajánlatkérés</h1>
         <p><strong>Request ID:</strong> ${requestId}</p>
@@ -158,33 +161,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     // ============================================
     // 7. SUCCESS RESPONSE
     // ============================================
-    return new Response(
-      JSON.stringify({ success: true, quoteId }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...getRateLimitHeaders(rateLimit),
-        }
-      }
-    );
+    // FIX-008: Use unified success response
+    return success({ quoteId }, getRateLimitHeaders(rateLimit));
 
-  } catch (error) {
-    log.error('Submit handler error', error);
-
-    return jsonError('Internal server error', 500);
+  } catch (err) {
+    log.error('Submit handler error', err);
+    // FIX-008: Use unified error response
+    return error(ErrorCodes.INTERNAL_ERROR, 'Internal server error', 500);
   }
 };
-
-function jsonError(message: string, status: number, headers?: Record<string, string>): Response {
-  return new Response(
-    JSON.stringify({ success: false, error: message }),
-    {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      }
-    }
-  );
-}

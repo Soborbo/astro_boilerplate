@@ -4,25 +4,17 @@
  */
 
 import type { Locale } from '@/config/calculator/i18n';
+// FIX-001: Static import instead of require() for browser compatibility
+import huPostcodesData from '@/data/hu-postcodes.json';
 
-// Import postcode data (will be created in data folder)
-let huPostcodes: Record<string, string> | null = null;
+const huPostcodes: Record<string, string> = huPostcodesData;
 
 /**
  * Synchronous lookup for Hungarian postcodes
  * Uses local data for instant response
  */
 export function lookupCitySync(postcode: string): string | null {
-  // Lazy load Hungarian postcode data
-  if (!huPostcodes) {
-    try {
-      huPostcodes = require('@/data/hu-postcodes.json');
-    } catch {
-      return null;
-    }
-  }
-
-  return huPostcodes?.[postcode] || null;
+  return huPostcodes[postcode] || null;
 }
 
 /**

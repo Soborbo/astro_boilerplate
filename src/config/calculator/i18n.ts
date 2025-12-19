@@ -29,6 +29,8 @@ export const i18n: Record<Locale, {
     honeypotTriggered: string;
     rateLimitExceeded: string;
     serverError: string;
+    // FIX-002: Additional error messages
+    fixErrors: string;
   };
 
   // Social proof
@@ -53,6 +55,12 @@ export const i18n: Record<Locale, {
   selectMultiple: string;
   yourDetails: string;
   quoteNumber: string;
+
+  // FIX-002: Additional UI strings
+  secureEncryption: string;
+  emailFollowUp: string;
+  emailAutoReply: string;
+  emailSubjectAdmin: string;
 
   // Currency
   currency: 'HUF' | 'GBP';
@@ -84,6 +92,8 @@ export const i18n: Record<Locale, {
       honeypotTriggered: 'Érvénytelen beküldés',
       rateLimitExceeded: 'Túl sok kérés. Kérjük, várjon egy percet.',
       serverError: 'Hiba történt. Kérjük, próbálja újra később.',
+      // FIX-002
+      fixErrors: 'Kérjük, javítsa a következő hibákat:',
     },
 
     reviews: 'értékelés',
@@ -104,6 +114,12 @@ export const i18n: Record<Locale, {
     selectMultiple: 'Válasszon egyet vagy többet',
     yourDetails: 'Az Ön adatai',
     quoteNumber: 'Ajánlat azonosító',
+
+    // FIX-002: Additional strings
+    secureEncryption: 'Biztonságosan titkosítva',
+    emailFollowUp: 'Hamarosan felvesszük Önnel a kapcsolatot a megadott elérhetőségeken.',
+    emailAutoReply: 'Ez egy automatikus email. Kérjük, ne válaszoljon rá.',
+    emailSubjectAdmin: 'Új ajánlatkérés',
 
     currency: 'HUF',
     currencyLocale: 'hu-HU',
@@ -135,6 +151,8 @@ export const i18n: Record<Locale, {
       honeypotTriggered: 'Invalid submission',
       rateLimitExceeded: 'Too many requests. Please wait.',
       serverError: 'An error occurred. Please try again later.',
+      // FIX-002
+      fixErrors: 'Please fix the following errors:',
     },
 
     reviews: 'reviews',
@@ -155,6 +173,12 @@ export const i18n: Record<Locale, {
     selectMultiple: 'Select one or more',
     yourDetails: 'Your details',
     quoteNumber: 'Quote number',
+
+    // FIX-002: Additional strings
+    secureEncryption: 'Securely encrypted',
+    emailFollowUp: 'We will contact you shortly at the provided contact details.',
+    emailAutoReply: 'This is an automated email. Please do not reply.',
+    emailSubjectAdmin: 'New quote request',
 
     currency: 'GBP',
     currencyLocale: 'en-GB',

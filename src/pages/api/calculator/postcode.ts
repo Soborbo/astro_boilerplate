@@ -4,6 +4,8 @@ import { lookupCityAsync } from '@/lib/calculator/postcode';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/calculator/rate-limit';
 import { createLogger, generateRequestId } from '@/lib/calculator/logger';
 import { siteConfig } from '@/config/calculator/site';
+// FIX-008: Use unified API response format
+import { success, error, ErrorCodes } from '@/lib/calculator/api-response';
 
 export const prerender = false;
 
@@ -21,7 +23,14 @@ export const GET: APIRoute = async ({ request, clientAddress, url }) => {
 
     if (!rateLimit.allowed) {
       log.warn('Rate limit exceeded', { ip });
-      return jsonError('Too many requests', 429, getRateLimitHeaders(rateLimit));
+      // FIX-008: Use unified error response
+      return error(
+        ErrorCodes.RATE_LIMIT_EXCEEDED,
+        'Too many requests',
+        429,
+        undefined,
+        getRateLimitHeaders(rateLimit)
+      );
     }
 
     // ============================================
@@ -30,14 +39,28 @@ export const GET: APIRoute = async ({ request, clientAddress, url }) => {
     const code = url.searchParams.get('code');
 
     if (!code) {
-      return jsonError('Missing postcode parameter', 400, getRateLimitHeaders(rateLimit));
+      // FIX-008: Use unified error response
+      return error(
+        ErrorCodes.MISSING_PARAMETER,
+        'Missing postcode parameter',
+        400,
+        undefined,
+        getRateLimitHeaders(rateLimit)
+      );
     }
 
     const result = postcodeLookupSchema.safeParse({ code });
 
     if (!result.success) {
       log.warn('Invalid postcode', { code, errors: result.error.flatten() });
-      return jsonError('Invalid postcode', 400, getRateLimitHeaders(rateLimit));
+      // FIX-008: Use unified error response
+      return error(
+        ErrorCodes.INVALID_POSTCODE,
+        'Invalid postcode',
+        400,
+        { errors: result.error.flatten() },
+        getRateLimitHeaders(rateLimit)
+      );
     }
 
     // ============================================
@@ -50,32 +73,12 @@ export const GET: APIRoute = async ({ request, clientAddress, url }) => {
     // ============================================
     // 4. RESPONSE
     // ============================================
-    return new Response(
-      JSON.stringify({ city }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...getRateLimitHeaders(rateLimit),
-        }
-      }
-    );
+    // FIX-008: Use unified success response
+    return success({ city }, getRateLimitHeaders(rateLimit));
 
-  } catch (error) {
-    log.error('Postcode lookup error', error);
-    return jsonError('Internal server error', 500);
+  } catch (err) {
+    log.error('Postcode lookup error', err);
+    // FIX-008: Use unified error response
+    return error(ErrorCodes.INTERNAL_ERROR, 'Internal server error', 500);
   }
 };
-
-function jsonError(message: string, status: number, headers?: Record<string, string>): Response {
-  return new Response(
-    JSON.stringify({ error: message }),
-    {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      }
-    }
-  );
-}

@@ -9,8 +9,8 @@ const siteUrl = 'https://example.com';
 
 export default defineConfig({
   site: siteUrl,
-  // FIX-008: Changed to 'hybrid' for API routes with prerender = false
-  output: 'hybrid', // Cloudflare Pages with API routes
+  // Astro 5: output: "static" (default) now supports API routes with prerender = false
+  // No need to specify output: "hybrid" anymore
   adapter: cloudflare({
     imageService: 'cloudflare',
   }),

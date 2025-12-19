@@ -1,0 +1,115 @@
+---
+/**
+ * Radio Card Component
+ * Interactive card for single-choice selection with microinteractions
+ */
+
+interface Props {
+  id: string;
+  name: string;
+  value: string;
+  title: string;
+  description?: string;
+  image?: string;
+  icon?: string;
+  popular?: boolean;
+  autoAdvance?: boolean;
+}
+
+const {
+  id,
+  name,
+  value,
+  title,
+  description,
+  image,
+  icon,
+  popular = false,
+  autoAdvance = true,
+} = Astro.props;
+---
+
+<label
+  for={id}
+  data-radio-card
+  class="
+    relative block p-6 bg-white border-2 border-gray-200 rounded-xl cursor-pointer
+    transition-all duration-200 ease-out
+    hover:border-primary-300 hover:shadow-md hover:-translate-y-0.5
+    focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2
+    has-[:checked]:border-primary has-[:checked]:bg-primary-50 has-[:checked]:shadow-lg
+    group
+  "
+>
+  {/* Popular badge */}
+  {popular && (
+    <div class="absolute -top-3 -right-3 px-3 py-1 bg-accent text-white text-xs font-bold rounded-full shadow-md">
+      Népszerű
+    </div>
+  )}
+
+  {/* Radio input (hidden but accessible) */}
+  <input
+    type="radio"
+    id={id}
+    name={name}
+    value={value}
+    data-auto-advance={autoAdvance}
+    class="sr-only peer"
+  />
+
+  <div class="flex flex-col items-center text-center space-y-3">
+    {/* Icon or image */}
+    {icon && (
+      <div class="text-4xl transition-transform duration-200 group-hover:scale-110">
+        {icon}
+      </div>
+    )}
+
+    {image && (
+      <img
+        src={image}
+        alt={title}
+        class="w-16 h-16 object-cover rounded-lg transition-transform duration-200 group-hover:scale-110"
+        loading="lazy"
+      />
+    )}
+
+    {/* Title */}
+    <div class="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+      {title}
+    </div>
+
+    {/* Description */}
+    {description && (
+      <p class="text-sm text-gray-600 leading-relaxed">
+        {description}
+      </p>
+    )}
+
+    {/* Selected indicator */}
+    <div class="absolute bottom-4 right-4 opacity-0 peer-checked:opacity-100 transition-opacity duration-200">
+      <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+  </div>
+</label>
+
+<style>
+  /* Prevent layout shift on hover */
+  [data-radio-card] {
+    will-change: transform;
+  }
+
+  /* Smooth transitions respecting user preferences */
+  @media (prefers-reduced-motion: reduce) {
+    [data-radio-card] {
+      transition: none;
+    }
+  }
+</style>

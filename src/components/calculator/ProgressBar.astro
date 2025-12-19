@@ -1,0 +1,113 @@
+---
+/**
+ * Progress Bar Component
+ * Shows current step and allows navigation to previous steps
+ */
+
+import { STEPS, getStepIndex, getProgressPercentage } from '@/config/calculator/steps';
+import { siteConfig } from '@/config/calculator/site';
+import { i18n } from '@/config/calculator/i18n';
+
+interface Props {
+  currentStep: number;
+}
+
+const { currentStep } = Astro.props;
+const t = i18n[siteConfig.locale];
+const totalSteps = STEPS.length;
+const percentage = Math.round((currentStep / totalSteps) * 100);
+---
+
+<div class="w-full bg-white border-b border-gray-200 sticky top-0 z-40" role="navigation" aria-label="Progress">
+  <div class="max-w-4xl mx-auto px-4 py-4">
+    <!-- Step counter -->
+    <div class="flex justify-between items-center mb-2">
+      <span class="text-sm font-medium text-gray-700">
+        {t.step} {currentStep} {t.of} {totalSteps}
+      </span>
+      <span class="text-sm text-gray-500">{percentage}%</span>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div
+        class="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-primary-light transition-all duration-500 ease-out"
+        style={`width: ${percentage}%`}
+        role="progressbar"
+        aria-valuenow={percentage}
+        aria-valuemin="0"
+        aria-valuemax="100"
+      />
+    </div>
+
+    <!-- Step dots (optional, only on desktop) -->
+    <div class="hidden md:flex justify-between mt-4">
+      {STEPS.map((step, index) => {
+        const stepNumber = index + 1;
+        const isCompleted = stepNumber < currentStep;
+        const isCurrent = stepNumber === currentStep;
+        const isFuture = stepNumber > currentStep;
+
+        return (
+          <div class="flex flex-col items-center flex-1 relative">
+            {/* Connecting line */}
+            {index < STEPS.length - 1 && (
+              <div
+                class={`absolute top-4 left-1/2 w-full h-0.5 -z-10 ${
+                  isCompleted ? 'bg-primary' : 'bg-gray-300'
+                }`}
+              />
+            )}
+
+            {/* Step dot */}
+            <a
+              href={`/calculator/${step.slug}`}
+              data-step-link
+              data-step-index={stepNumber}
+              data-current-index={currentStep}
+              class={`
+                w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+                transition-all duration-300 hover:scale-110
+                ${
+                  isCurrent
+                    ? 'bg-primary text-white ring-4 ring-primary-100 shadow-lg'
+                    : isCompleted
+                    ? 'bg-primary text-white hover:bg-primary-dark cursor-pointer'
+                    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                }
+              `}
+              aria-current={isCurrent ? 'step' : undefined}
+              aria-label={`${t.step} ${stepNumber}: ${step.title}`}
+            >
+              {isCompleted ? (
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                stepNumber
+              )}
+            </a>
+
+            {/* Step label */}
+            <span
+              class={`mt-2 text-xs text-center ${
+                isCurrent ? 'text-primary font-semibold' : 'text-gray-600'
+              }`}
+            >
+              {step.id === 'contact' ? 'Kapcsolat' : `${stepNumber}. lépés`}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Smooth progress bar animation */
+  @media (prefers-reduced-motion: no-preference) {
+    [role="progressbar"] {
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+</style>

@@ -1,0 +1,17 @@
+---
+/**
+ * Calculator Landing Page
+ * Entry point for the calculator
+ */
+
+import CalculatorLayout from '@/layouts/CalculatorLayout.astro';
+import SocialProofBar from '@/components/calculator/SocialProofBar.astro';
+import TrustBadges from '@/components/calculator/TrustBadges.astro';
+import { STEPS } from '@/config/calculator/steps';
+import { siteConfig } from '@/config/calculator/site';
+
+const firstStep = STEPS[0];
+
+// Redirect to first step
+return Astro.redirect(`/calculator/${firstStep.slug}`);
+---

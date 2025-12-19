@@ -1,0 +1,237 @@
+---
+/**
+ * Contact Form Component
+ * Final step form with validation and submission handling
+ */
+
+import TextInput from './forms/TextInput.astro';
+import EmailInput from './forms/EmailInput.astro';
+import PhoneInput from './forms/PhoneInput.astro';
+import PostcodeInput from './forms/PostcodeInput.astro';
+import CityInput from './forms/CityInput.astro';
+import { siteConfig } from '@/config/calculator/site';
+import { i18n } from '@/config/calculator/i18n';
+
+interface Props {
+  prevStepSlug?: string;
+}
+
+const { prevStepSlug } = Astro.props;
+const t = i18n[siteConfig.locale];
+---
+
+<form
+  id="contact-form"
+  class="space-y-6 max-w-2xl mx-auto"
+  novalidate
+>
+  {/* Hidden honeypot field (bot protection) */}
+  <input
+    type="text"
+    name="company"
+    autocomplete="off"
+    tabindex="-1"
+    class="absolute -left-[9999px]"
+    aria-hidden="true"
+  />
+
+  {/* Hidden form start time (submission speed check) */}
+  <input
+    type="hidden"
+    name="formStartTime"
+    id="formStartTime"
+    value={Date.now()}
+  />
+
+  {/* Name fields */}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <TextInput
+      id="firstName"
+      name="firstName"
+      label={t.firstName}
+      required={true}
+      autocomplete="given-name"
+      minlength={2}
+      maxlength={50}
+    />
+
+    <TextInput
+      id="lastName"
+      name="lastName"
+      label={t.lastName}
+      required={true}
+      autocomplete="family-name"
+      minlength={2}
+      maxlength={50}
+    />
+  </div>
+
+  {/* Email */}
+  <EmailInput required={true} />
+
+  {/* Phone */}
+  <PhoneInput required={true} />
+
+  {/* Postcode and City */}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <PostcodeInput required={true} />
+    <CityInput required={true} />
+  </div>
+
+  {/* Form errors container */}
+  <div id="form-errors" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg" role="alert">
+    <p class="text-sm text-red-800 font-semibold mb-2">Kérjük, javítsa a következő hibákat:</p>
+    <ul id="form-errors-list" class="text-sm text-red-700 list-disc list-inside space-y-1">
+      {/* Errors will be inserted here by JS */}
+    </ul>
+  </div>
+
+  {/* Submit buttons */}
+  <div class="flex flex-col sm:flex-row gap-4 pt-4">
+    {prevStepSlug && (
+      <a
+        href={`/calculator/${prevStepSlug}`}
+        class="
+          px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg
+          hover:bg-gray-300 transition-colors duration-200
+          focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2
+          text-center
+        "
+      >
+        {t.back}
+      </a>
+    )}
+
+    <button
+      type="submit"
+      id="submit-btn"
+      class="
+        flex-1 px-8 py-4 bg-primary text-white font-bold text-lg rounded-lg
+        hover:bg-primary-dark transition-all duration-200
+        focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+        disabled:opacity-50 disabled:cursor-not-allowed
+        shadow-lg hover:shadow-xl
+        relative overflow-hidden
+        group
+      "
+    >
+      <span class="relative z-10 flex items-center justify-center gap-2">
+        <span id="btn-text">{t.submit}</span>
+        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </span>
+
+      {/* Loading spinner (hidden by default) */}
+      <span id="btn-spinner" class="hidden absolute inset-0 flex items-center justify-center">
+        <svg class="animate-spin h-6 w-6 text-white" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+      </span>
+    </button>
+  </div>
+
+  {/* Trust indicators */}
+  <div class="text-center text-sm text-gray-600 pt-2">
+    <p class="flex items-center justify-center gap-2">
+      <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+      </svg>
+      Biztonságosan titkosítva
+    </p>
+  </div>
+</form>
+
+<script>
+  import { submitForm, showToast } from '@/lib/calculator/client.ts';
+
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const btnText = document.getElementById('btn-text') as HTMLSpanElement;
+  const btnSpinner = document.getElementById('btn-spinner') as HTMLSpanElement;
+  const errorsContainer = document.getElementById('form-errors') as HTMLDivElement;
+  const errorsList = document.getElementById('form-errors-list') as HTMLUListElement;
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Disable button and show loading
+      submitBtn.disabled = true;
+      btnText.classList.add('hidden');
+      btnSpinner.classList.remove('hidden');
+      errorsContainer.classList.add('hidden');
+
+      try {
+        const result = await submitForm(form);
+
+        if (result.success) {
+          // Redirect to thank you page
+          window.location.href = `/calculator/koszonjuk?quoteId=${result.quoteId}`;
+        } else {
+          // Show validation errors
+          if (result.errors) {
+            errorsList.innerHTML = '';
+            Object.entries(result.errors).forEach(([field, messages]) => {
+              messages.forEach((message: string) => {
+                const li = document.createElement('li');
+                li.textContent = message;
+                errorsList.appendChild(li);
+              });
+            });
+            errorsContainer.classList.remove('hidden');
+            errorsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } else {
+            showToast('Hiba történt. Kérjük, próbálja újra később.', 'error');
+          }
+
+          // Re-enable button
+          submitBtn.disabled = false;
+          btnText.classList.remove('hidden');
+          btnSpinner.classList.add('hidden');
+        }
+      } catch (error) {
+        console.error('Form submission error:', error);
+        showToast('Hiba történt. Kérjük, próbálja újra később.', 'error');
+
+        // Re-enable button
+        submitBtn.disabled = false;
+        btnText.classList.remove('hidden');
+        btnSpinner.classList.add('hidden');
+      }
+    });
+  }
+</script>
+
+<style>
+  /* Button ripple effect on click */
+  button[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  button[type="submit"]:active::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Respect user preferences */
+  @media (prefers-reduced-motion: reduce) {
+    button[type="submit"]::before {
+      transition: none;
+    }
+  }
+</style>

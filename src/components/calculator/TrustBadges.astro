@@ -1,0 +1,73 @@
+---
+/**
+ * Trust Badges Component
+ * Displays trust badges (security, GDPR, guarantees, etc.)
+ */
+
+import { TRUST_BADGES } from '@/config/calculator/social-proof';
+
+interface Props {
+  className?: string;
+}
+
+const { className = '' } = Astro.props;
+---
+
+<div class={`flex flex-wrap items-center justify-center gap-4 md:gap-6 ${className}`}>
+  {TRUST_BADGES.map((badge) => (
+    <div
+      class="group flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+      title={badge.tooltip}
+    >
+      {/* Icon */}
+      {badge.icon && (
+        <span class="text-xl md:text-2xl">{badge.icon}</span>
+      )}
+
+      {/* Image */}
+      {badge.image && (
+        <img
+          src={badge.image}
+          alt={badge.name}
+          class="h-6 md:h-8 w-auto object-contain"
+          loading="lazy"
+        />
+      )}
+
+      {/* Badge name */}
+      <span class="text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap">
+        {badge.name}
+      </span>
+
+      {/* Tooltip (visible on hover for devices with hover support) */}
+      {badge.tooltip && (
+        <div
+          class="
+            hidden group-hover:block absolute z-10 px-3 py-2 -mt-24 ml-4
+            bg-gray-900 text-white text-xs rounded-lg shadow-lg
+            whitespace-normal max-w-xs
+            pointer-events-none
+          "
+          role="tooltip"
+        >
+          {badge.tooltip}
+          <div class="absolute -bottom-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45" />
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
+<style>
+  /* Ensure tooltips don't cause layout issues */
+  .group {
+    position: relative;
+  }
+
+  /* Respect user preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .group:hover {
+      transition: none;
+    }
+  }
+</style>

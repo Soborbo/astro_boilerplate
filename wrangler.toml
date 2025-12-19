@@ -5,11 +5,12 @@ name = "project-name"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "./dist"
 
-# KV Namespace - Rate limiting a form handler-hez
-# Létrehozás: wrangler kv:namespace create FORM_SUBMISSIONS
-# [[kv_namespaces]]
-# binding = "FORM_SUBMISSIONS"
-# id = "xxxxxxxxxxxxxxxxxxxxx"
+# KV Namespace - Rate limiting a kalkulátor form handler-hez
+# Létrehozás: wrangler kv:namespace create RATE_LIMIT_KV
+# Utána írd be az ID-t az alábbi sorba
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "YOUR_KV_NAMESPACE_ID_HERE"  # ⚠️ Cseréld le az igazi ID-ra!
 
 # Environment Variables példák (a dashboard-on állítsd be, NE itt!)
 # [vars]

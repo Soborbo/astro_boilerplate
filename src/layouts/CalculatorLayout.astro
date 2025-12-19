@@ -1,0 +1,138 @@
+---
+/**
+ * Calculator Layout
+ * Base layout for all calculator pages
+ */
+
+import { siteConfig } from '@/config/calculator/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  currentStepSlug?: string;
+}
+
+const { title, description, currentStepSlug } = Astro.props;
+
+const pageTitle = `${title} | ${siteConfig.name}`;
+const pageDescription = description || `Lead generation calculator - ${title}`;
+---
+
+<!doctype html>
+<html lang={siteConfig.locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={pageDescription} />
+
+    <title>{pageTitle}</title>
+
+    {/* Preconnect to external resources */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    {/* Favicon */}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    {/* Fonts */}
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    {/* Prevent indexing on calculator pages (optional - remove if you want SEO) */}
+    <meta name="robots" content="noindex, nofollow" />
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+
+    {/* Styles */}
+    <style is:global>
+      /* Custom calculator styles */
+      body {
+        background-color: #f9fafb;
+      }
+
+      /* Smooth scroll behavior */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+
+      /* Focus visible styles for accessibility */
+      *:focus-visible {
+        outline: 2px solid #0ea5e9;
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen flex flex-col">
+    {/* Skip to content link for accessibility */}
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg"
+    >
+      Skip to content
+    </a>
+
+    {/* Simple header */}
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <a href="/" class="text-xl font-bold text-primary hover:text-primary-dark transition-colors">
+          {siteConfig.name}
+        </a>
+
+        {siteConfig.contact.phone && (
+          <a
+            href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`}
+            class="hidden sm:flex items-center gap-2 text-gray-700 hover:text-primary transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+            <span class="font-medium">{siteConfig.contact.phone}</span>
+          </a>
+        )}
+      </div>
+    </header>
+
+    {/* Main content */}
+    <main id="main-content" class="flex-1">
+      <slot />
+    </main>
+
+    {/* Simple footer */}
+    <footer class="bg-white border-t border-gray-200 mt-12">
+      <div class="max-w-6xl mx-auto px-4 py-8 text-center text-sm text-gray-600">
+        <p>© {new Date().getFullYear()} {siteConfig.name}. Minden jog fenntartva.</p>
+        <div class="mt-2 space-x-4">
+          <a href="/adatvedelem" class="hover:text-primary transition-colors">
+            Adatvédelem
+          </a>
+          <a href="/aszf" class="hover:text-primary transition-colors">
+            ÁSZF
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    {/* GTM (if enabled) */}
+    {siteConfig.gtm.enabled && siteConfig.gtm.id && (
+      <script type="text/partytown" define:vars={{ gtmId: siteConfig.gtm.id }}>
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer', gtmId);
+      </script>
+    )}
+  </body>
+</html>

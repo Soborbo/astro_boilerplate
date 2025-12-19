@@ -1,0 +1,55 @@
+---
+/**
+ * Social Proof Bar Component
+ * Displays trust indicators and social proof statistics
+ */
+
+import { SOCIAL_PROOF_STATS } from '@/config/calculator/social-proof';
+
+interface Props {
+  variant?: 'full' | 'compact';
+}
+
+const { variant = 'full' } = Astro.props;
+---
+
+<div class={`bg-gradient-to-r from-primary-50 to-blue-50 border-b border-primary-100 ${variant === 'full' ? 'py-6' : 'py-3'}`}>
+  <div class="max-w-6xl mx-auto px-4">
+    <div class={`grid grid-cols-2 md:grid-cols-4 gap-4 ${variant === 'compact' ? 'md:gap-6' : 'md:gap-8'}`}>
+      {SOCIAL_PROOF_STATS.map((stat) => (
+        <div class="text-center">
+          <div class="flex flex-col items-center gap-1">
+            {stat.icon && (
+              <span class={`text-2xl ${variant === 'full' ? 'md:text-3xl' : ''}`}>
+                {stat.icon}
+              </span>
+            )}
+            <div class={`font-bold text-primary ${variant === 'full' ? 'text-2xl md:text-3xl' : 'text-lg md:text-2xl'}`}>
+              {stat.value}
+            </div>
+            <div class={`text-gray-700 ${variant === 'full' ? 'text-sm md:text-base' : 'text-xs md:text-sm'}`}>
+              {stat.label}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Subtle animation on hover */
+  @media (hover: hover) {
+    .grid > div:hover {
+      transform: scale(1.05);
+      transition: transform 0.2s ease;
+    }
+  }
+
+  /* Respect user preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .grid > div:hover {
+      transform: none;
+    }
+  }
+</style>

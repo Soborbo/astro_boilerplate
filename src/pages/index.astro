@@ -22,6 +22,13 @@ const stats = [
 
 const services = [
   {
+    title: '🧮 Interaktív Árkalkulátor',
+    description: 'Kapj azonnali árajánlatot! Töltsd ki a kérdőívet és azonnal megkapod a becsült árat.',
+    icon: '💰',
+    ctaText: 'Kalkulátor indítása',
+    ctaHref: '/calculator'
+  },
+  {
     title: 'Szolgáltatás 1',
     description: 'Rövid leírás a szolgáltatásról, ami segít a látogatónak megérteni az értéket.',
     icon: '🚀',
@@ -34,13 +41,6 @@ const services = [
     icon: '💡',
     ctaText: i18n.common.learnMore,
     ctaHref: '/szolgaltatas-2'
-  },
-  {
-    title: 'Szolgáltatás 3',
-    description: 'Rövid leírás a szolgáltatásról, ami segít a látogatónak megérteni az értéket.',
-    icon: '⚡',
-    ctaText: i18n.common.learnMore,
-    ctaHref: '/szolgaltatas-3'
   },
 ];
 
@@ -110,9 +110,14 @@ const testimonials = [
             Részletesebb leírás, ami elmagyarázza az értékajánlatot és cselekvésre ösztönöz.
           </p>
           <div class="flex flex-col sm:flex-row gap-4">
-            <a href="#contact" class="btn btn-primary">{i18n.common.getQuote}</a>
-            <a href="#services" class="btn btn-secondary">{i18n.common.learnMore}</a>
+            <a href="/calculator" class="btn btn-primary">
+              🧮 Árkalkulátor
+            </a>
+            <a href="#contact" class="btn btn-secondary">{i18n.common.getQuote}</a>
           </div>
+          <p class="text-sm text-gray-500 mt-4">
+            💡 Használd az <strong>interaktív kalkulátort</strong> az azonnali árajánlatért
+          </p>
         </div>
         <div class="lg:col-span-2 order-1 lg:order-2">
           <div class="relative aspect-[4/3] lg:aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl bg-gray-200 flex items-center justify-center">

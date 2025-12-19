@@ -59,20 +59,21 @@ const {
   />
 
   <div class="flex flex-col items-center text-center space-y-3">
-    {/* Icon or image */}
-    {icon && (
-      <div class="text-4xl transition-transform duration-200 group-hover:scale-110">
-        {icon}
-      </div>
-    )}
-
+    {/* Image (1:1 ratio, larger) */}
     {image && (
       <img
         src={image}
         alt={title}
-        class="w-16 h-16 object-cover rounded-lg transition-transform duration-200 group-hover:scale-110"
+        class="w-32 h-32 object-cover rounded-lg transition-transform duration-200 group-hover:scale-105"
         loading="lazy"
       />
+    )}
+
+    {/* Icon fallback (only if no image) */}
+    {!image && icon && (
+      <div class="text-4xl transition-transform duration-200 group-hover:scale-110">
+        {icon}
+      </div>
     )}
 
     {/* Title */}

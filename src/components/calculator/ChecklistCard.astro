@@ -13,6 +13,7 @@ interface Props {
   value: string;
   title: string;
   description?: string;
+  image?: string;
   icon?: string;
   price?: number;
   popular?: boolean;
@@ -24,6 +25,7 @@ const {
   value,
   title,
   description,
+  image,
   icon,
   price,
   popular = false,
@@ -63,9 +65,19 @@ const priceText = price !== undefined && price !== 0
   {/* Content */}
   <div class="ml-4 flex-1">
     <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        {/* Icon */}
-        {icon && (
+      <div class="flex items-center gap-3">
+        {/* Image (small, 1:1 ratio) */}
+        {image && (
+          <img
+            src={image}
+            alt={title}
+            class="w-12 h-12 object-cover rounded transition-transform duration-200 group-hover:scale-105"
+            loading="lazy"
+          />
+        )}
+
+        {/* Icon fallback (only if no image) */}
+        {!image && icon && (
           <span class="text-2xl transition-transform duration-200 group-hover:scale-110">
             {icon}
           </span>

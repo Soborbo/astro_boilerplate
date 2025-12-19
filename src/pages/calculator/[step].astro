@@ -6,7 +6,6 @@
 
 import CalculatorLayout from '@/layouts/CalculatorLayout.astro';
 import ProgressBar from '@/components/calculator/ProgressBar.astro';
-import SocialProofBar from '@/components/calculator/SocialProofBar.astro';
 import RadioCard from '@/components/calculator/RadioCard.astro';
 import ChecklistCard from '@/components/calculator/ChecklistCard.astro';
 import ContactForm from '@/components/calculator/ContactForm.astro';
@@ -36,7 +35,6 @@ const t = i18n[siteConfig.locale];
 ---
 
 <CalculatorLayout title={stepConfig.title} currentStepSlug={stepSlug}>
-  <SocialProofBar variant="compact" />
   <ProgressBar currentStep={stepIndex} />
 
   <main class="py-8 px-4">
@@ -83,6 +81,7 @@ const t = i18n[siteConfig.locale];
               value={option.value}
               title={option.title}
               description={option.description}
+              image={option.image}
               icon={option.icon}
               price={option.price}
               popular={option.popular}

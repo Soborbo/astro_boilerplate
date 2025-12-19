@@ -23,7 +23,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'basic',
       title: 'Alapcsomag',
       description: 'Kezdőknek ideális megoldás',
-      icon: '📦',
+      image: 'https://via.placeholder.com/200/3b82f6/ffffff?text=Alap',
       price: 50000,
     },
     {
@@ -31,7 +31,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'standard',
       title: 'Standard csomag',
       description: 'A legtöbben ezt választják',
-      icon: '⭐',
+      image: 'https://via.placeholder.com/200/10b981/ffffff?text=Standard',
       price: 100000,
       popular: true,
     },
@@ -40,7 +40,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'premium',
       title: 'Prémium csomag',
       description: 'Professzionális megoldás',
-      icon: '💎',
+      image: 'https://via.placeholder.com/200/8b5cf6/ffffff?text=Premium',
       price: 200000,
     },
     {
@@ -48,7 +48,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'custom',
       title: 'Egyedi csomag',
       description: 'Teljes testreszabás',
-      icon: '🎯',
+      image: 'https://via.placeholder.com/200/f59e0b/ffffff?text=Egyedi',
       price: 0, // Custom pricing
     },
   ],
@@ -60,7 +60,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'support',
       title: 'Kiterjesztett támogatás',
       description: '24/7 ügyfélszolgálat',
-      icon: '🎧',
+      image: 'https://via.placeholder.com/80/06b6d4/ffffff?text=%F0%9F%8E%A7',
       price: 20000,
     },
     {
@@ -68,7 +68,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'training',
       title: 'Képzés',
       description: 'Személyre szabott oktatás',
-      icon: '📚',
+      image: 'https://via.placeholder.com/80/8b5cf6/ffffff?text=%F0%9F%93%9A',
       price: 30000,
     },
     {
@@ -76,7 +76,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'consulting',
       title: 'Tanácsadás',
       description: 'Szakértői segítség',
-      icon: '💡',
+      image: 'https://via.placeholder.com/80/f59e0b/ffffff?text=%F0%9F%92%A1',
       price: 50000,
       popular: true,
     },
@@ -85,7 +85,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'maintenance',
       title: 'Karbantartás',
       description: 'Havi rendszeres karbantartás',
-      icon: '🔧',
+      image: 'https://via.placeholder.com/80/10b981/ffffff?text=%F0%9F%94%A7',
       price: 15000,
     },
   ],
@@ -97,7 +97,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'urgent',
       title: 'Sürgős (1-2 hét)',
       description: 'Extra díj ellenében',
-      icon: '🚀',
+      image: 'https://via.placeholder.com/200/ef4444/ffffff?text=Surgos',
       price: 50000, // Surcharge
     },
     {
@@ -105,7 +105,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'normal',
       title: 'Normál (3-4 hét)',
       description: 'Ajánlott időkeret',
-      icon: '📅',
+      image: 'https://via.placeholder.com/200/10b981/ffffff?text=Normal',
       price: 0,
       popular: true,
     },
@@ -114,7 +114,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'flexible',
       title: 'Rugalmas (1-2 hónap)',
       description: 'Kedvezményes árral',
-      icon: '⏰',
+      image: 'https://via.placeholder.com/200/3b82f6/ffffff?text=Rugalmas',
       price: -20000, // Discount
     },
     {
@@ -122,7 +122,7 @@ export const STEP_OPTIONS: Record<string, Option[]> = {
       value: 'later',
       title: 'Későbbi időpontban',
       description: 'Még nem biztos',
-      icon: '🗓️',
+      image: 'https://via.placeholder.com/200/6b7280/ffffff?text=Kesobb',
       price: 0,
     },
   ],

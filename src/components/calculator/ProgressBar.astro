@@ -20,14 +20,6 @@ const percentage = Math.round((currentStep / totalSteps) * 100);
 
 <div class="w-full bg-white border-b border-gray-200 sticky top-0 z-40" role="navigation" aria-label="Progress">
   <div class="max-w-4xl mx-auto px-4 py-4">
-    <!-- Step counter -->
-    <div class="flex justify-between items-center mb-2">
-      <span class="text-sm font-medium text-gray-700">
-        {t.step} {currentStep} {t.of} {totalSteps}
-      </span>
-      <span class="text-sm text-gray-500">{percentage}%</span>
-    </div>
-
     <!-- Progress bar -->
     <div class="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
       <div
@@ -37,6 +29,7 @@ const percentage = Math.round((currentStep / totalSteps) * 100);
         aria-valuenow={percentage}
         aria-valuemin="0"
         aria-valuemax="100"
+        aria-label={`${t.step} ${currentStep} ${t.of} ${totalSteps}: ${percentage}%`}
       />
     </div>
 

@@ -8,9 +8,10 @@ pages_build_output_dir = "./dist"
 # KV Namespace - Rate limiting a kalkulátor form handler-hez
 # Létrehozás: wrangler kv:namespace create RATE_LIMIT_KV
 # Utána írd be az ID-t az alábbi sorba
-[[kv_namespaces]]
-binding = "RATE_LIMIT_KV"
-id = "YOUR_KV_NAMESPACE_ID_HERE"  # ⚠️ Cseréld le az igazi ID-ra!
+# Jelenleg kikommentelve - a rate limiting gracefully fail-el ha nincs KV
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT_KV"
+# id = "YOUR_KV_NAMESPACE_ID_HERE"  # ⚠️ Cseréld le az igazi ID-ra!
 
 # Environment Variables példák (a dashboard-on állítsd be, NE itt!)
 # [vars]
